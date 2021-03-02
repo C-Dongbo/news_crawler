@@ -4,7 +4,7 @@ import datetime
 
 
 def search(index_name, query):
-    es = Elasticsearch('192.168.1.253:9200', http_auth=("elastic","changeme"))
+    es = Elasticsearch('http://192.168.1.253:9200', http_auth=("elastic","123456"))
     index = index_name
     body = query
     res = es.search(index=index, body=body)
@@ -12,7 +12,7 @@ def search(index_name, query):
 
 
 def insert_data(index_name, doc_list):
-    es = Elasticsearch('192.168.1.253:9200', http_auth=("elastic","changeme"))
+    es = Elasticsearch('http://192.168.1.253:9200', http_auth=("elastic","123456")) # python에서 localhost안먹힘, host를 특정해야함
     index=index_name
     
 #    for doc in doc_list:
@@ -46,4 +46,5 @@ if __name__ == '__main__':
     doc_list.append(doc1)
     doc_list.append(doc2)
 
-    insert_data(index_name="test", doc_list = doc_list)
+    #insert_data(index_name="test", doc_list = doc_list)
+    search(index_name = "test", query = {"query": {"match_all": {}}})

@@ -43,7 +43,7 @@ class naver():
             soup = BeautifulSoup(res.content, 'html.parser')
             news_info_list = self.get_news_html(soup)
             for news_info in news_info_list:
-                if first_news_flag and first_page_flag:
+                if first_news_flag and first_page_flag: ## 클러스터 뉴스 페이지의 첫 뉴스는 대상 뉴스이므로 제외
                     first_news_flag = False
                     continue
                 title = news_info.select_one('div.news_wrap.api_ani_send > div.news_area > a').text
