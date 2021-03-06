@@ -2,9 +2,17 @@ from elasticsearch import Elasticsearch, helpers
 import datetime
 
 
+def drop_index(index_name):
+    es = Elasticsearch('http://0.0.0.0:9200', http_auth=("elastic","123456"))
+    es.indices.delete(index = index_name, ignore=[400,404])
+
+
+def delete_doc(index_name, query):
+    es = Elasticsearch('http://0.0.0.0:9200', http_auth=("elastic","123456"))
+    es.delete_by_query(index = index_name, doc_type="_doc", body = query)
 
 def search(index_name, query):
-    es = Elasticsearch('http://192.168.1.253:9200', http_auth=("elastic","123456"))
+    es = Elasticsearch('http://0.0.0.0:9200', http_auth=("elastic","123456"))
     index = index_name
     body = query
     res = es.search(index=index, body=body)
@@ -12,22 +20,20 @@ def search(index_name, query):
 
 
 def insert_data(index_name, doc_list):
-    es = Elasticsearch('http://192.168.1.253:9200', http_auth=("elastic","123456")) # python에서 localhost안먹힘, host를 특정해야함
+    es = Elasticsearch('http://0.0.0.0:9200', http_auth=("elastic","123456")) # python에서 localhost안먹힘, host를 특정해야함
     index=index_name
     
-#    for doc in doc_list:
-#        es.index(index=index, doc_type="_doc", body=doc)
+
     helpers.bulk(es, doc_list)
 
 if __name__ == '__main__':
-
-
+    drop_index("test")
     doc1 = {
         "_index" : "test",
         "_source" :{
-            "category" : "APPLE WATCH",
+            "product_name" : "IPHONE 12",
             "c_key" : "1",
-            "price" : 3040000,
+            "price" : 13040000,
             "status" : 1,
             "@timestamp" : datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
         }
@@ -35,7 +41,7 @@ if __name__ == '__main__':
     doc2 = {
         "_index" : "test",
         "_source" :{
-            "category" : "APPLE WATCH",
+            "product_name" : "APPLE WATCH",
             "c_key" : "2",
             "price" : 3040000,
             "status" : 1,
@@ -46,5 +52,5 @@ if __name__ == '__main__':
     doc_list.append(doc1)
     doc_list.append(doc2)
 
-    #insert_data(index_name="test", doc_list = doc_list)
+    insert_data(index_name="test", doc_list = doc_list)
     search(index_name = "test", query = {"query": {"match_all": {}}})
