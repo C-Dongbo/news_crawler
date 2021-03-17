@@ -27,4 +27,5 @@ def get_news(query):
 if __name__ == '__main__':
     #get_news('삼성전자')
     parser = naver("삼성전자")
-    print(parser.get_news_info())
+    results = parser.get_news_info()
+    print(results[0])
