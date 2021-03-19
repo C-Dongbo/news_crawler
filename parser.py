@@ -16,11 +16,17 @@ class naver():
         self.soup = BeautifulSoup(self.res.content, 'html.parser')
         self.cluster_id = 0
 
+    def set_id(self, new_id):
+        self.id = new_id
+
     def get_total_news_num(self):
         return self.id + self.cluster_id
 
     def get_cluster_news_num(self):
         return self.cluster_id
+
+    def reset_cluster_id(self):
+        self.cluster_id = 0
 
     def get_news_html(self, soup):
         news_info_list = soup.select('#main_pack > section > div.api_subject_bx > div.group_news > ul > li')
@@ -54,10 +60,16 @@ class naver():
                     first_news_flag = False
                     continue
                 title = news_info.select_one('div.news_wrap.api_ani_send > div.news_area > a').text
+                title = re.sub("\"", "", title)
+                title = re.sub("\'", "", title)
+                title = re.sub("\‘", "", title)                
                 desc = news_info.select_one('div.news_wrap.api_ani_send > div.news_area > div.news_dsc > div.dsc_wrap > a').text
+                desc = re.sub("\"", "", desc)
+                desc = re.sub("\'", "", desc)
+                desc = re.sub("\‘", "", desc)
                 news_url = news_info.find("a")["href"]
                 self.cluster_id += 1
-                results.append({"_id":self.cluster_id , "title": title, "desc":desc, "url":news_url})
+                results.append({"id":"{}-{}".format(self.id, self.cluster_id) , "title": title, "desc":desc, "url":news_url})
 
         return results
 
@@ -71,8 +83,16 @@ class naver():
             results = {}
             for news_info in news_info_list:
                 self.id += 1
+                print(self.id)
                 title = news_info.select_one('div.news_wrap.api_ani_send > div.news_area > a').text
+                title = re.sub("\"", "", title)
+                title = re.sub("\'", "", title)
+                title = re.sub("\‘", "", title)
+                print(title)
                 desc = news_info.select_one('div.news_wrap.api_ani_send > div.news_area > div.news_dsc > div.dsc_wrap > a').text
+                desc = re.sub("\"", "", desc)
+                desc = re.sub("\'", "", desc)
+                desc = re.sub("\‘", "", desc)             
                 news_url = news_info.find("a")["href"]
                 cluster = news_info.select_one('a.news_more')  # 숫자만 빼내야댐
                 if cluster != None:
@@ -81,10 +101,13 @@ class naver():
                     num = cluster_str[idx:idx+13]
                     cluster_news_url = 'https://search.naver.com/search.naver?where=news&query={}&sm=tab_opt&sort=0&photo=0&field=0&reporter_article=&pd=0&ds=&de=&docid={}&nso=&mynews=0&refresh_start=0&related=1'.format(self.query, num)
                     cluster_news_results = self.get_cluster_news_info(cluster_news_url)
+                    self.reset_cluster_id()
                 else:
                     cluster_news_results = []
+                    self.reset_cluster_id()
+
                 results= {"_index": "news_"+self.query, 
-                          "_source":{"_id" : self.id, "title":title, "desc":desc, "url":news_url, "cluster_news_list":cluster_news_results}  
+                          "_source":{"id" : self.id, "title":title, "desc":desc, "url":news_url, "cluster_news_list":cluster_news_results}  
                         }
                 results_list.append(results)
         return results_list
